@@ -16,14 +16,11 @@ def CLIArguments():
 	return [Args.match]
 	
 def getMatchids (Browser):
-	#print("Three things to enter: ")
-	#username = input("Enter your riot username: ")
-	#password = getpass.getpass("Enter your riot password: ")
-	#summonerurl = input("Enter the link to your riot match history")
-	username = "petiyou14"
-	password = "Nobleandhigh1998"
-	summonerurl = "https://matchhistory.na.leagueoflegends.com/en/#match-history/NA1/216553215"
-	# try:
+	print("Three things to enter: ")
+	username = input("Enter your riot username: ")
+	password = getpass.getpass("Enter your riot password: ")
+	summonerurl = input("Enter the link to your riot match history, navigate to https://matchhistory.na.leagueoflegends.com and log in. EG: https://matchhistory.na.leagueoflegends.com/en/#match-history/NA1/216553215: ")
+
 	Browser.get(summonerurl)
 	time.sleep(5)
 	PageElement = Browser.find_element_by_name("username")
@@ -38,101 +35,112 @@ def getMatchids (Browser):
 	Browser.refresh()
 	time.sleep(5)
 
-	SCROLL_PAUSE_TIME = 0.5
-	last_height = Browser.execute_script("return document.body.scrollHeight")
+	while (True):
+		searchstart = input("Enter 1 to enter the exact date and time for the first game to start scrapping from.\nEnter 2 to scroll to the first custom game")
 
-	while(True):
-		try:
-			Browser.find_element_by_id("game-summary-20997")
-			print("Found")
-			break;
-		except:
-		        # Scroll down to bottom
-				Browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+		if searchstart == "1":
+			searchtime = input("Enter the duration of the game in the format: MM:SS. EG: 36:24. *** NO SPACES: ")
+			datetime = input("Enter the duration of the game in the format: MM/DD/YYYY. EG: 36:24. *** NO SPACES AND NO NEED FOR LEADING ZEROS: ")
 
-		        # Wait to load page
-				time.sleep(SCROLL_PAUSE_TIME)
-
-		        # Calculate new scroll height and compare with last scroll height
-				new_height = Browser.execute_script("return document.body.scrollHeight")
-				if new_height == last_height:
-					print("End of page")
+			SCROLL_PAUSE_TIME = 0.5
+			last_height = Browser.execute_script("return document.body.scrollHeight")
+			while(True):
+				try:
+					pageraw = Browser.page_source
+					time.sleep(SCROLL_PAUSE_TIME)
+					datematch = re.findall(r"\<div id=\"(date-duration-\d+)\" class=\"date-duration\" style=\"\"\>\<span class=\"date-duration-duration\"\>\<div id=\"binding-\d+\" class=\"binding\" style=\"\">\b"+searchtime+r"\b\<\/div\>\<\/span\> \<span class=\"date-duration-date\"\>\<div id=\"binding-\d+\" class=\"binding\" style=\"\">\b"+datetime+r"\b<\/div><\/span><\/div>", pageraw)
+					time.sleep(SCROLL_PAUSE_TIME)
+					print(datematch)
+					PageElement6 = Browser.find_element_by_id(datematch[0])
+					time.sleep(SCROLL_PAUSE_TIME)
+					print("Found")
 					break;
-				last_height = new_height
-	time.sleep(5)
+				except:
+						# Scroll down to bottom
+						Browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-	# print("failed1 new one")
-	# PageElement4 = Browser.find_element_by_id("binding-775")
-	# print("failed2")
-	# PageElement4.click()
-	# print("failed3")
-	# time.sleep(1)
-	# print(Browser.current_url)
-	# print("failed4")
-	# time.sleep(1)
-	# print("failed5")
-	# Browser.get("https://matchhistory.na.leagueoflegends.com/en/#match-history/NA1/216553215")
-	# Browser.refresh()
+						# Wait to load page
+						time.sleep(SCROLL_PAUSE_TIME)
+
+						# Calculate new scroll height and compare with last scroll height
+						new_height = Browser.execute_script("return document.body.scrollHeight")
+						if new_height == last_height:
+							print("End of page")
+							break;
+						last_height = new_height
+			time.sleep(5)
+			break;
+		elif searchstart == "2":
+			stop = input("Scroll to the first custom game and type in anything then press Enter to start scraping: SCROLL TILL YOU SEE FIRST GAME -> [Any Key] + [Enter]")
+			break;
+		else:
+			print("Please enter 1 or 2 idiot")
 
 	pageraw = Browser.page_source
 
-	regexmatch = re.findall(r"\<div id\=\"binding\-\d+\" class\=\"binding\" style\=\"\"\>Custom\<\/div\>", pageraw)
+	fileopener = open("checkcustoms.txt", "w", encoding="utf-8")
+	fileopener.write(str(pageraw))
 
-	idstoclick = []
+	typematch = re.findall(r"\<span class\=\"map-mode-queue\"\>\<div id\=\"binding-\d+\" class=\"binding\" style\=\"\"\>(.*?)\<\/div\>\<\/span\>", pageraw)
+	timematch = re.findall(r"\<span class\=\"date-duration-duration\"\>\<div id\=\"binding\-\d+\" class\=\"binding\" style\=\"\"\>(.*?)\<\/div\>", pageraw)
+	datematch = re.findall(r"\<span class\=\"date-duration-date\"\>\<div id\=\"binding\-\d+\" class\=\"binding\" style\=\"\"\>(.*?)\<\/div\>", pageraw)
 
-	for reggie in regexmatch:
-		reggie1 = reggie.split('id="')[1]
-		reggie2 = reggie1.split('" class')[0]
-		idstoclick.append(reggie2)
-	#print(idstoclick)
-	#pageraw.split('" class="binding" style="">Custom</div>')
+	matchlist = X = [list(e) for e in zip(timematch, datematch, typematch)]
 
-	# fileopener = open("pagesource.txt", "w")
-	# fileopener.write(str(pageraw.encode("utf-8")))
+	custommatches = []
 
-	#matchidurl = []
+	for items in matchlist:
+		if items[2].lower() == 'custom':
+			custommatches.append([items[0],items[1]])
 
 	allsummoners = []
 	summoners = []
 
-	counter = len(idstoclick)
+	counter = len(custommatches)
 
-	for ids in idstoclick:
-		print(ids)
-		print("This many ids left: " + str(counter))
+	for match in custommatches:
+		print(match[0])
+		print(match[1])
+
+		print("This many matches left to scrape: " + str(counter))
 		counter -= 1
-		if counter == 90:
-			break;
-		SCROLL_PAUSE_TIME = 1
+
+		SCROLL_PAUSE_TIME = 0.5
 		last_height = Browser.execute_script("return document.body.scrollHeight")
 
 		while(True):
 			try:
-				PageElement6 = Browser.find_element_by_id(ids)
-				#PageElement6 = Browser.find_element_by_id("binding-773")
+				time.sleep(SCROLL_PAUSE_TIME)
+				datematch = re.findall(r"\<div id=\"(date-duration-\d+)\" class=\"date-duration\" style=\"\"\>\<span class=\"date-duration-duration\"\>\<div id=\"binding-\d+\" class=\"binding\" style=\"\">\b"+match[0]+r"\b\<\/div\>\<\/span\> \<span class=\"date-duration-date\"\>\<div id=\"binding-\d+\" class=\"binding\" style=\"\">\b"+match[1]+r"\b<\/div><\/span><\/div>", pageraw)
+				time.sleep(SCROLL_PAUSE_TIME)
+				PageElement6 = Browser.find_element_by_id(datematch[0])
+				time.sleep(SCROLL_PAUSE_TIME)
 				PageElement6.click()
-				time.sleep(1)
+				time.sleep(SCROLL_PAUSE_TIME)
+
 				urlb = Browser.current_url
-				#matchidurl.append(urlb)
+				urlbID = re.search(r"match\-details\/(NA1|NA)\/(.*?)\/", urlb)
+
 				rawpage = Browser.page_source
 				matchregex = re.findall(r"match\-history\/(NA1|NA)\/\d+\".*?\>(.*?)\<\/a\>", rawpage)
-				#<a href="#match-history/NA1/210676684" class="summoner-long">CandyConnoisseur</a>
-				#print(matchregex)
 
-				#print(urlb)
-				urlbID = re.search(r"match\-details\/(NA1|NA)\/(.*?)\/", urlb)
-				#print(urlbID[2])
-				for maggie in matchregex:
-					maggie1 = maggie[1]
-					summoners.append(maggie1)
-					#print(maggie1)
-				summoners.pop(0)
-				summoners.append(urlbID[2])
-				allsummoners.append(summoners)
-				summoners = []
-				print(allsummoners)
-				#print("found")
-				break;
+				howlingyuck = re.findall(r"Howling Abyss", rawpage)
+
+				if (howlingyuck):
+					print("Hollowing Abyss skipping")
+					pass;
+				else:
+					customyes = re.findall(r"Custom", rawpage)
+					if(customyes):
+						for maggie in matchregex:
+							maggie1 = maggie[1]
+							summoners.append(maggie1)
+						summoners.pop(0)
+						summoners.append(urlbID[2])
+						allsummoners.append(summoners)
+						summoners = []
+						print(allsummoners)
+						break;
 			except:
 				# Scroll down to bottom
 				Browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -147,14 +155,16 @@ def getMatchids (Browser):
 					break;
 				last_height = new_height
 
-		time.sleep(1)
-		Browser.get("https://matchhistory.na.leagueoflegends.com/en/#match-history/NA1/216553215")
-		time.sleep(1)
+		time.sleep(0.5)
+
+		Browser.get(summonerurl)
+
+		time.sleep(0.5)
 		Browser.refresh()
-		time.sleep(2.5)
-		
+		time.sleep(0.5)		
 	
-	fileopener = open("matpart.txt", "w")
+	print("Got all the matches! If you see an error just copy and paste it out of the console into a text file.")
+	fileopener = open("matches.txt", "a")
 	fileopener.write(str(allsummoners))
 	
 def main():
@@ -163,16 +173,18 @@ def main():
 
 	#If none of the Arguments are True
 	if not any(Args):
- 		print("\nNo validation requested. Try -h or --help for your options\n")
+ 		print("\nNo Argument provied. Try -h or --help for your options\n")
  		sys.exit()
 
 	#Setting the driver as chrome
-	ChromeDriver = webdriver.Chrome(executable_path='C:/Users/bollouballs/Downloads/chromedriver_win32/chromedriver.exe')
+	chrome_options = webdriver.ChromeOptions()
+	chrome_options.add_argument("--incognito")
+	ChromeDriver = webdriver.Chrome(executable_path='C:/Users/bollouballs/Downloads/chromedriver_win32/chromedriver.exe', chrome_options=chrome_options)
 
 
 	if Args [0] == True:
 		getMatchids(ChromeDriver)
-		print("getMatchids")
+		print("Success and we done. Written by Bryan Bollou. Github: https://github.com/bolloubryan. Website: bollou.com")
 		time.sleep(5)
 	
 	ChromeDriver.close()
