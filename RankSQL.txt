@@ -1,0 +1,769 @@
+SELECT @Max_total_games := (MAX(total_games)/5) FROM qustoms.summoner;
+
+SELECT @Winrates := total_wins/total_games as winrate FROM qustoms.summoner WHERE total_games > @Max_total_games;
+
+SELECT @Max_Winrate := MAX(@Winrates);
+
+SELECT (total_wins/total_games)/@Max_Winrate as w_score, summoner_name FROM qustoms.summoner WHERE total_games > @Max_total_games;
+
+just do join search
+------------
+
+SELECT @Max_win_rate:= (MAX(total_games)/5) FROM qustoms.summoner;
+
+
+SELECT @Max_win_rate:= (MAX(total_games)/5) FROM qustoms.summoner;
+
+
+-----------------------
+
+SELECT total_wins/total_games as winrate, summoner_name FROM qustoms.summoner WHERE total_games > (MAX(total_games)/4);
+
+SELECT (MAX(total_games)/5) FROM qustoms.summoner;
+
+SELECT @Max_total_games := (MAX(total_games)/5) FROM qustoms.summoner;
+
+SELECT @Winrates := total_wins/total_games as winrate FROM qustoms.summoner WHERE total_games > @Max_total_games;
+
+SELECT @Max_Winrate := MAX(@Winrates);
+
+here
+
+SELECT (total_wins/total_games)/@Max_Winrate as w_score, summoner_name FROM qustoms.summoner WHERE total_games > @Max_total_games;
+
+just do join search
+
+------
+SELECT (total_wins/total_games)/c.MaxWinrate as w_score, summoner_name FROM qustoms.summoner d
+INNER JOIN (
+SELECT MAX(a.winrate) as MaxWinrate FROM qustoms.summoner ) c
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate 
+FROM qustoms.summoner ) a
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b 
+ON a.total_games > b.MaxTotalGames;
+
+SELECT MAX(a.winrate) as MaxWinrate FROM qustoms.summoner c
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate 
+FROM qustoms.summoner ) a
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b 
+ON a.total_games > b.MaxTotalGames;
+
+almost
+
+SELECT (total_wins/total_games)/c.MaxWinrate as w_score, summoner_name FROM qustoms.summoner d
+INNER JOIN(
+SELECT MAX(a.winrate) as MaxWinrate FROM qustoms.summoner
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate 
+FROM qustoms.summoner ) a
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b 
+ON a.total_games > b.MaxTotalGames ) c ; 
+
+change
+
+SELECT (total_wins/total_games)/c.MaxWinrate as w_score, summoner_name FROM qustoms.summoner d
+INNER JOIN(
+SELECT MAX(a.winrate) as MaxWinrate FROM qustoms.summoner
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate 
+FROM qustoms.summoner ) a
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b 
+ON a.total_games > b.MaxTotalGames ) c ; 
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&& JOINS &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+For query: Winrate Score
+
+1.
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner
+
+2.
+SELECT total_games, total_wins/total_games as winrate, b.MaxTotalGames
+FROM qustoms.summoner a
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b 
+ON a.total_games > b.MaxTotalGames;
+
+3.
+SELECT MAX(a.winrate) as MaxWinrate, a.MaxTotalGames FROM qustoms.summoner c
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate, b.MaxTotalGames as MaxTotalGames
+FROM qustoms.summoner 
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b
+ON total_games > b.MaxTotalGames ) a;
+
+4.
+SELECT (total_wins/total_games)/c.MaxWinrate * 10 as w_score, summoner_name FROM qustoms.summoner d
+INNER JOIN(
+SELECT MAX(a.winrate) as MaxWinrate, a.MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate, b.MaxTotalGames as MaxTotalGames
+FROM qustoms.summoner 
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b
+ON total_games > b.MaxTotalGames ) a ) c
+WHERE total_games > c.MaxTotalGames;
+
+For query: Total Games Score
+1. 
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner;
+
+2. 
+SELECT total_games/a.MaxTotalGames *10 as GameScore, summoner_name from qustoms.summoner b
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5;
+
+2 with ID.
+SELECT total_games/a.MaxTotalGames *10 as GameScore, summoner_name, id from qustoms.summoner b
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5;
+
+For query: Role Diversity Score
+1. 
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner;
+
+2.
+SELECT summoner_name,
+  STDDEV(t)   standard_deviation_of_all_t_values
+FROM
+(
+  SELECT top_games AS t, summoner_name FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name  FROM qustoms.summoner
+)
+  AS data
+GROUP BY summoner_name;
+
+3.
+SELECT summoner_name, total_games,
+  STDDEV(t)   standard_deviation_of_all_t_values
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name;
+
+4.
+SELECT MIN(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b;
+
+5.
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b;
+
+6.
+SELECT summoner_name, total_games, c.MaxTotalGames as MaxTotalGames, (c.MaxRoleDiversity+c.MinRoleDiversity)/(c.MaxRoleDiversity+STDDEV(t))*10 as RoleDiversityScore
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b )c
+GROUP BY summoner_name;
+
+7.
+SELECT d.summoner_name as summoner_name, d.RoleDiverSityScore as RoleDiversityScore, d.total_games as total_games, d.MaxTotalGames as MaxTotalGames from qustoms.summoner e
+INNER JOIN(
+SELECT summoner_name, total_games, c.MaxTotalGames as MaxTotalGames, (c.MaxRoleDiversity+c.MinRoleDiversity)/(c.MaxRoleDiversity+STDDEV(t))*10 as RoleDiversityScore
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b )c
+GROUP BY summoner_name ) d
+GROUP BY d.summoner_name;
+
+8.
+SELECT e.summoner_name, e.RoleDiversityScore from qustoms.summoner
+INNER JOIN (
+SELECT d.summoner_name as summoner_name, d.RoleDiverSityScore as RoleDiversityScore, d.total_games as total_games, d.MaxTotalGames as MaxTotalGames from qustoms.summoner e
+INNER JOIN(
+SELECT summoner_name, total_games, c.MaxTotalGames as MaxTotalGames, (c.MaxRoleDiversity+c.MinRoleDiversity)/(c.MaxRoleDiversity+STDDEV(t))*10 as RoleDiversityScore
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b )c
+GROUP BY summoner_name ) d
+GROUP BY d.summoner_name ) e
+WHERE e.total_games > e.MaxTotalGames/5
+GROUP BY e.summoner_name;
+
+8 with id.
+SELECT e.summoner_name, e.RoleDiversityScore, e.idnew as id from qustoms.summoner
+INNER JOIN (
+SELECT d.summoner_name as summoner_name, d.RoleDiverSityScore as RoleDiversityScore, d.total_games as total_games, d.MaxTotalGames as MaxTotalGames, d.id as idnew from qustoms.summoner e
+INNER JOIN(
+SELECT summoner_name, total_games, c.MaxTotalGames as MaxTotalGames, (c.MaxRoleDiversity+c.MinRoleDiversity)/(c.MaxRoleDiversity+STDDEV(t))*10 as RoleDiversityScore, id
+FROM
+(
+  SELECT top_games AS t, summoner_name, id, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b )c
+GROUP BY summoner_name ) d
+GROUP BY d.summoner_name ) e
+WHERE e.total_games > e.MaxTotalGames/5
+GROUP BY e.summoner_name;
+
+For query: Champ Pool Score
+1.
+SELECT MAX(total_games) as MaxTotalGames, id from qustoms.summoner;
+
+2.
+SELECT b.id as EnoughGamesID from qustoms.summoner b
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames, id from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5;
+
+NEW
+SELECT b.id as EnoughGamesID, a.MaxTotalGames as MaxTotalGames from qustoms.summoner b
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames, id from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5;
+
+3.
+SELECT b.EnoughGamesID, count( distinct champion_id) from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id;
+
+NEW
+
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id;
+
+4.
+SELECT Max(c.ChampPoolSize) as MaxChampPool from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID, count( distinct champion_id) as ChampPoolSize from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c;
+
+NEW ?
+
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames, c.EnoughGamesID from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c ;
+
+NEWER ?
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames, c.EnoughGamesID from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c 
+GROUP BY EnoughGamesID;
+
+
+5.
+Close
+SELECT champion_id, d.EnoughGamesID, d.MaxTotalGames from qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames as MaxTotalGames, c.EnoughGamesID as EnoughGamesID from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c 
+GROUP BY c.EnoughGamedID) d;
+
+THIS IS KINDA IT?
+SELECT (count(distinct f.champion_id))/e.LargestChampPool * 10 as ChampScore, count(summoner_id) as TotalGames, summoner_id FROM qustoms.summoner_match f
+INNER JOIN (
+SELECT MAX(d.MaxChampPool) as LargestChampPool, d.MaxTotalGames2 as MaxTotalGames2 from qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames as MaxTotalGames2, c.EnoughGamesID as EnoughGamesID2 from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c 
+GROUP BY EnoughGamesID ) d ) e
+GROUP BY summoner_id;
+
+MADE REDO?
+NAH got it
+
+6.
+SELECT ChampScore, f.summoner_id from qustoms.summoner_match g
+INNER JOIN (
+SELECT (count(distinct champion_id))/e.LargestChampPool * 10 as ChampScore, count(summoner_id) as TotalGames, summoner_id, e.MaxTotalGames2 as MaxTotalGames2 FROM qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(d.MaxChampPool) as LargestChampPool, d.MaxTotalGames2 as MaxTotalGames2 from qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames as MaxTotalGames2, c.EnoughGamesID as EnoughGamesID2 from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c 
+GROUP BY EnoughGamesID ) d ) e
+GROUP BY summoner_id ) f
+WHERE f.TotalGames > f.MaxTotalGames2/5 
+GROUP BY summoner_id;
+
+For query: KDA
+1.
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner;
+
+2.
+SELECT (total_kills+total_assists)/total_deaths as KDA, a.MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner ) a
+WHERE total_games > a.MaxTotalGames/5;
+
+3.
+SELECT ((total_kills+total_assists)/total_deaths)/MaxKDA * 10 as KDAScore, summoner_name, id from qustoms.summoner d
+INNER JOIN (
+SELECT MAX(KDA) as MaxKDA, MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT (total_kills+total_assists)/total_deaths as KDA, MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner ) a
+WHERE total_games > a.MaxTotalGames/5 ) b ) c
+WHERE total_games > c.MaxTotalGames/5;
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@ UNION THEM ALL @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+SELECT id, SUM(Score) PlayerRankScore
+FROM
+(
+################################ KDA Score ################################
+SELECT ((total_kills+total_assists)/total_deaths)/MaxKDA * 10 as Score, id from qustoms.summoner d
+INNER JOIN (
+SELECT MAX(KDA) as MaxKDA, MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT (total_kills+total_assists)/total_deaths as KDA, MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner ) a
+WHERE total_games > a.MaxTotalGames/5 ) b ) c
+WHERE total_games > c.MaxTotalGames/5
+UNION ALL
+################################ Champ Pool Score ################################
+SELECT ChampScore as Score, f.summoner_id from qustoms.summoner_match g
+INNER JOIN (
+SELECT (count(distinct champion_id))/e.LargestChampPool * 10 as ChampScore, count(summoner_id) as TotalGames, summoner_id, e.MaxTotalGames2 as MaxTotalGames2 FROM qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(d.MaxChampPool) as LargestChampPool, d.MaxTotalGames2 as MaxTotalGames2 from qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames as MaxTotalGames2, c.EnoughGamesID as EnoughGamesID2 from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c 
+GROUP BY EnoughGamesID ) d ) e
+GROUP BY summoner_id ) f
+WHERE f.TotalGames > f.MaxTotalGames2/5 
+GROUP BY summoner_id
+UNION ALL
+################################ Total Diversity Score ################################
+SELECT e.RoleDiversityScore as Score, e.idnew as id from qustoms.summoner
+INNER JOIN (
+SELECT d.summoner_name as summoner_name, d.RoleDiverSityScore as RoleDiversityScore, d.total_games as total_games, d.MaxTotalGames as MaxTotalGames, d.id as idnew from qustoms.summoner e
+INNER JOIN(
+SELECT summoner_name, total_games, c.MaxTotalGames as MaxTotalGames, (c.MaxRoleDiversity+c.MinRoleDiversity)/(c.MaxRoleDiversity+STDDEV(t))*10 as RoleDiversityScore, id
+FROM
+(
+  SELECT top_games AS t, summoner_name, id, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b )c
+GROUP BY summoner_name ) d
+GROUP BY d.summoner_name ) e
+WHERE e.total_games > e.MaxTotalGames/5
+GROUP BY e.summoner_name
+################################ Win Rate Score ################################
+UNION ALL
+SELECT (total_wins/total_games)/c.MaxWinrate * 10 as Score, id FROM qustoms.summoner d
+INNER JOIN(
+SELECT MAX(a.winrate) as MaxWinrate, a.MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate, b.MaxTotalGames as MaxTotalGames
+FROM qustoms.summoner 
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b
+ON total_games > b.MaxTotalGames ) a ) c
+WHERE total_games > c.MaxTotalGames
+################################ Total Games Score ################################
+UNION ALL
+SELECT total_games/a.MaxTotalGames *10 as Score, id from qustoms.summoner b
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+)
+AS data
+GROUP BY id;
+
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$ FINAL PLAYER RANK TABLE $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+SELECT j.id, summoner_name, j.PlayerRankScore from qustoms.summoner t
+INNER JOIN(
+SELECT id, SUM(Score) PlayerRankScore
+FROM
+(
+################################ KDA Score ################################
+SELECT ((total_kills+total_assists)/total_deaths)/MaxKDA * 10 as Score, id from qustoms.summoner d
+INNER JOIN (
+SELECT MAX(KDA) as MaxKDA, MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT (total_kills+total_assists)/total_deaths as KDA, MaxTotalGames as MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner ) a
+WHERE total_games > a.MaxTotalGames/5 ) b ) c
+WHERE total_games > c.MaxTotalGames/5
+UNION ALL
+################################ Champ Pool Score ################################
+SELECT ChampScore as Score, f.summoner_id from qustoms.summoner_match g
+INNER JOIN (
+SELECT (count(distinct champion_id))/e.LargestChampPool * 10 as ChampScore, count(summoner_id) as TotalGames, summoner_id, e.MaxTotalGames2 as MaxTotalGames2 FROM qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(d.MaxChampPool) as LargestChampPool, d.MaxTotalGames2 as MaxTotalGames2 from qustoms.summoner_match
+INNER JOIN (
+SELECT MAX(c.ChampPoolSize) as MaxChampPool, c.MaxTotalGames as MaxTotalGames2, c.EnoughGamesID as EnoughGamesID2 from qustoms.summoner_match
+INNER JOIN (
+SELECT b.EnoughGamesID as EnoughGamesID, b.MaxTotalGames as MaxTotalGames, count( distinct champion_id) as ChampPoolSize  from qustoms.summoner_match
+INNER JOIN(
+SELECT id as EnoughGamesID, MaxTotalGames from qustoms.summoner
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner )a
+WHERE total_games > a.MaxTotalGames/5) b
+WHERE b.EnoughGamesID = summoner_id
+GROUP BY summoner_id ) c 
+GROUP BY EnoughGamesID ) d ) e
+GROUP BY summoner_id ) f
+WHERE f.TotalGames > f.MaxTotalGames2/5 
+GROUP BY summoner_id
+UNION ALL
+################################ Total Diversity Score ################################
+SELECT e.RoleDiversityScore as Score, e.idnew as id from qustoms.summoner
+INNER JOIN (
+SELECT d.summoner_name as summoner_name, d.RoleDiverSityScore as RoleDiversityScore, d.total_games as total_games, d.MaxTotalGames as MaxTotalGames, d.id as idnew from qustoms.summoner e
+INNER JOIN(
+SELECT summoner_name, total_games, c.MaxTotalGames as MaxTotalGames, (c.MaxRoleDiversity+c.MinRoleDiversity)/(c.MaxRoleDiversity+STDDEV(t))*10 as RoleDiversityScore, id
+FROM
+(
+  SELECT top_games AS t, summoner_name, id, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, id, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MIN(RoleDiversity) as MinRoleDiversity, MAX(RoleDiversity) as MaxRoleDiversity, b.MaxTotalGames as MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT summoner_name, total_games,
+  STDDEV(t) as RoleDiversity, a.MaxTotalGames as MaxTotalGames
+FROM
+(
+  SELECT top_games AS t, summoner_name, total_games FROM qustoms.summoner
+  UNION ALL
+  SELECT jgl_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT mid_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT adc_games AS t, summoner_name, total_games  FROM qustoms.summoner
+  UNION ALL
+  SELECT sup_games AS t, summoner_name, total_games  FROM qustoms.summoner
+)
+  AS data
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+GROUP BY summoner_name ) b )c
+GROUP BY summoner_name ) d
+GROUP BY d.summoner_name ) e
+WHERE e.total_games > e.MaxTotalGames/5
+GROUP BY e.summoner_name
+################################ Win Rate Score ################################
+UNION ALL
+SELECT (total_wins/total_games)/c.MaxWinrate * 10 as Score, id FROM qustoms.summoner d
+INNER JOIN(
+SELECT MAX(a.winrate) as MaxWinrate, a.MaxTotalGames FROM qustoms.summoner
+INNER JOIN (
+SELECT total_games, total_wins/total_games as winrate, b.MaxTotalGames as MaxTotalGames
+FROM qustoms.summoner 
+INNER JOIN (
+SELECT (MAX(total_games)/5) as MaxTotalGames 
+FROM qustoms.summoner) b
+ON total_games > b.MaxTotalGames ) a ) c
+WHERE total_games > c.MaxTotalGames
+################################ Total Games Score ################################
+UNION ALL
+SELECT total_games/a.MaxTotalGames *10 as Score, id from qustoms.summoner b
+INNER JOIN(
+SELECT MAX(total_games) as MaxTotalGames from qustoms.summoner) a
+WHERE total_games > a.MaxTotalGames/5
+)
+AS data
+GROUP BY id ) j
+ON j.id = t.id;
