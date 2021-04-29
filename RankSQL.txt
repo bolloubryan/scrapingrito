@@ -1,5 +1,4 @@
 SELECT @Max_total_games := (MAX(total_games)/5) FROM qustoms.summoner;
-#e
 
 SELECT @Winrates := total_wins/total_games as winrate FROM qustoms.summoner WHERE total_games > @Max_total_games;
 
