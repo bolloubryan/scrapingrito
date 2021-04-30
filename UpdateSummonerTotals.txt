@@ -1,0 +1,103 @@
+DELIMITER $$
+CREATE TRIGGER UpdateSummonerTotals 
+    AFTER UPDATE 
+    ON qustoms.summoner_match FOR EACH ROW  
+    BEGIN 
+        IF NEW.win = 1 THEN 
+            UPDATE qustoms.summoner SET 
+                total_wins = total_wins + 1, 
+                total_kills = total_kills + NEW.kills, 
+                total_assists = total_assists + NEW.assists, 
+                total_deaths = total_deaths + NEW.deaths, 
+                total_games = total_games + 1 
+                WHERE id = NEW.summoner_id; 
+        ELSE  
+            UPDATE qustoms.summoner SET 
+                total_kills = total_kills + NEW.kills, 
+                total_assists = total_assists + NEW.assists, 
+                total_deaths = total_deaths + NEW.deaths, 
+                total_games = total_games + 1 
+                WHERE id = NEW.summoner_id; 
+        END IF; 
+        IF NEW.position = "TOP" AND NEW.win = 1 THEN 
+            UPDATE qustoms.summoner SET 
+                top_wins = top_wins + 1, 
+                top_games = top_games + 1, 
+                top_kills = top_kills + NEW.kills, 
+                top_deaths = top_deaths + NEW.deaths, 
+                top_assists = top_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        ELSEIF NEW.position = "TOP" THEN 
+            UPDATE qustoms.summoner SET 
+                top_games = top_games + 1, 
+                top_kills = top_kills + NEW.kills, 
+                top_deaths = top_deaths + NEW.deaths, 
+                top_assists = top_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        END IF; 
+        IF NEW.position = "JUNGLE" AND NEW.win = 1 THEN 
+            UPDATE qustoms.summoner SET 
+                jgl_wins = jgl_wins + 1, 
+                jgl_games = jgl_games + 1, 
+                jgl_kills = jgl_kills + NEW.kills, 
+                jgl_deaths = jgl_deaths + NEW.deaths, 
+                jgl_assists = jgl_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        ELSEIF NEW.position = "JUNGLE" THEN 
+            UPDATE qustoms.summoner SET 
+                jgl_games = jgl_games + 1, 
+                jgl_kills = jgl_kills + NEW.kills, 
+                jgl_deaths = jgl_deaths + NEW.deaths, 
+                jgl_assists = jgl_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        END IF; 
+        IF NEW.position = "MIDDLE" AND NEW.win = 1 THEN 
+            UPDATE qustoms.summoner SET 
+                mid_wins = mid_wins + 1, 
+                mid_games = mid_games + 1, 
+                mid_kills = mid_kills + NEW.kills, 
+                mid_deaths = mid_deaths + NEW.deaths, 
+                mid_assists = mid_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        ELSEIF NEW.position = "MIDDLE" THEN 
+            UPDATE qustoms.summoner SET 
+                mid_games = mid_games + 1, 
+                mid_kills = mid_kills + NEW.kills, 
+                mid_deaths = mid_deaths + NEW.deaths, 
+                mid_assists = mid_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        END IF; 
+        IF NEW.position = "BOTTOM" AND NEW.win = 1 THEN 
+            UPDATE qustoms.summoner SET 
+                adc_wins = adc_wins + 1, 
+                adc_games = adc_games + 1, 
+                adc_kills = adc_kills + NEW.kills, 
+                adc_deaths = adc_deaths + NEW.deaths, 
+                adc_assists = adc_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        ELSEIF NEW.position = "BOTTOM" THEN 
+            UPDATE qustoms.summoner SET 
+                adc_games = adc_games + 1, 
+                adc_kills = adc_kills + NEW.kills, 
+                adc_deaths = adc_deaths + NEW.deaths, 
+                adc_assists = adc_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        END IF; 
+        IF NEW.position = "SUPPORT" AND NEW.win = 1 THEN 
+            UPDATE qustoms.summoner SET 
+                sup_wins = sup_wins + 1, 
+                sup_games = sup_games + 1, 
+                sup_kills = sup_kills + NEW.kills, 
+                sup_deaths = sup_deaths + NEW.deaths, 
+                sup_assists = sup_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        ELSEIF NEW.position = "SUPPORT" THEN 
+            UPDATE qustoms.summoner SET 
+                sup_games = sup_games + 1, 
+                sup_kills = sup_kills + NEW.kills, 
+                sup_deaths = sup_deaths + NEW.deaths, 
+                sup_assists = sup_assists + NEW.assists 
+                WHERE id = NEW.summoner_id; 
+        END IF; 
+    END $$
+DELIMITER ;
