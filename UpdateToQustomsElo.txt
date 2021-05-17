@@ -1,0 +1,152 @@
+KDA
+15
+40
+30
+35
+15
+25
+20
+25
+25
+10
+
+Role
+
+
+Champ
+WR
+Total Games
+
+----------
+KDA: 40
+Role: 0
+Champ: 0
+WR: 30
+Total Games: 30
+
+KDA: 30
+Role: 5
+Champ: 5
+WR: 50
+Total Games: 10
+
+KDA: 25
+Role: -25
+Champ: -25
+WR: 70
+Total Games: 5
+
+KDA : 30
+Role: 5
+Champ: 15 
+WR : 50
+total games: 0
+
+KDA: 35
+Role: 10
+Champ: 5
+WR: 40
+Total games: 10
+
+KDA: 25
+Role: 5
+Champ: 0
+WR: 55
+Total: 15
+
+kda 25
+role 15
+champ 15
+wr 25
+total games 20
+
+kda 25
+role 15
+champ 15
+wr 25
+total games 20
+
+KDA: 20
+Role: 15
+Champ: 15
+WR: 5
+Total Games: 10
+
+KDA: 20
+Role: 15
+Champ: 15
+WR: 30
+Total: 20
+
+-----
+
+KDA
+40
+30
+25
+30
+35
+25
+25
+25
+20
+20
+10 - Dev
+
+285/1100 : 25%
+
+Role
+0
+5
+0
+5
+10
+5
+15
+15
+15
+15
+20 - Dev
+105/1100 : 10%
+
+Champ
+0
+5
+0
+15 
+5
+0
+15
+15
+15
+15
+20 - Dev
+105/1100 : 10%
+
+WR
+30
+50
+70
+50
+40
+55
+25
+25
+5
+30
+40 - Dev
+420/1100 : 42%
+
+Total Games
+30
+10
+5
+0
+10
+15
+20
+20
+10
+20
+10 - Dev
+150/1100 : 13%
